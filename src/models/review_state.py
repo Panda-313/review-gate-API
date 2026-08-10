@@ -16,6 +16,7 @@ class ReviewState(TypedDict):
     category: str | None
     priority: str | None
     draft_reply: str | None
+    feedback: str | None
+    final_reply: str | None
     status: Status
-    human_feedback: str | None
     messages: Annotated[list[AnyMessage], add_messages]
