@@ -1,7 +1,11 @@
+from functools import partial
+
+from langchain_community.vectorstores import Chroma
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
+from .send import send
 from .human_approval import human_approval
 from .draft import draft_node
 from .classify import classify_node
@@ -16,14 +20,18 @@ def route_after_approval(state: ReviewState) -> str:
     if status == "drafting":
         return "draft"
 
-    return END
+    if status == "rejected":
+        return END
 
-def build_graph():
+    return "send"
+
+def build_graph(vectorstore: Chroma):
     builder = StateGraph(ReviewState)
 
     builder.add_node("classify", classify_node)
-    builder.add_node("draft", draft_node)
+    builder.add_node("draft", partial(draft_node, vectorstore=vectorstore))
     builder.add_node("human_approval", human_approval)
+    builder.add_node("send", send)
 
     builder.add_edge(START, "classify")
     builder.add_edge("classify", "draft")
@@ -33,6 +41,8 @@ def build_graph():
         "human_approval",
         route_after_approval,
     )
+
+    builder.add_edge("send", END)
 
     checkpointer = InMemorySaver()
 

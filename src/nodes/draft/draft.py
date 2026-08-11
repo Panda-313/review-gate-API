@@ -1,5 +1,6 @@
-from typing import cast
+from typing import Any, cast
 
+from langchain_community.vectorstores import Chroma
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -7,9 +8,10 @@ from langchain_openai import ChatOpenAI
 from .schema import DraftUpdate, DraftResult
 from src.config import BASE_NODE_MODEL, DRAFT_SYSTEM_PROMPT
 from src.models import ReviewState
+from src.tools import build_search_knowledge
 
 
-def draft_node(state: ReviewState) -> DraftUpdate:
+def draft_node(state: ReviewState, vectorstore: Chroma) -> DraftUpdate:
     """
     Generuje draft odpowiedzi na podstawie ticketu, kategorii, priorytetu oraz feedbacku - jezeli jest podany.
     Po zakonczeniu - wszstrymuje proces i czeka na feedback od użytkownika
@@ -18,16 +20,37 @@ def draft_node(state: ReviewState) -> DraftUpdate:
     llm = ChatOpenAI(model=BASE_NODE_MODEL, temperature=0)
     structured_llm = llm.with_structured_output(DraftResult)
 
+    search_query = f"{state.get('category')} - {state.get('ticket')}"
+    search_knowledge = build_search_knowledge(vectorstore)
+    knowledge_context = search_knowledge.func(search_query)
+
+    knowledge_section = ""
+    if knowledge_context is not None:
+        knowledge_section = f"\n\nWyniki z bazy wiedzy:\n{_format_knowledge_context(knowledge_context)}"
+    feedback_knowledge_section = f"{knowledge_section.lstrip()}\n\n" if knowledge_section else ""
+
+    print("*" * 60)
+    print(knowledge_section)
+    print("*" * 60)
+
     human_message = (
-            f"Kategoria: {state.get('category')}\n"
-            f"Priorytet: {state.get('priority')}\n\n"
+            "Przygotuj odpowiedź do klienta na podstawie danych poniżej.\n\n"
+            f"Kategoria:\n{state.get('category')}\n\n"
+            f"Priorytet:\n{state.get('priority')}\n\n"
             f"Zgłoszenie klienta:\n{state['ticket']}"
+            f"{knowledge_section}\n\n"
+            "Ważne: jeśli są dostępne wyniki z bazy wiedzy, oprzyj odpowiedź przede wszystkim na nich. "
+            "Jeśli baza wiedzy wskazuje konkretne przyczyny problemu albo sugeruje konkretne pytania diagnostyczne, użyj właśnie ich."
         ) if not state.get("feedback") else (
-            f"Kategoria: {state.get('category')}\n"
-            f"Priorytet: {state.get('priority')}\n\n"
-            f"Zgłoszenie klienta:\n{state['ticket']}\n\n"
+            "Przygotuj nową wersję draftu na podstawie danych poniżej.\n\n"
+            f"Kategoria:\n{state.get('category')}\n\n"
+            f"Priorytet:\n{state.get('priority')}\n\n"
+            f"Zgłoszenie klienta:\n{state['ticket']}"
+            f"{knowledge_section}\n\n"
             f"Ostatni draft:\n{state['draft_reply']}\n\n"
             f"Feedback managera (obowiazkowo uwzglednij):\n{state['feedback']}\n\n"
+            "Ważne: jeśli są dostępne wyniki z bazy wiedzy, oprzyj odpowiedź przede wszystkim na nich. "
+            "Uwzględnij każdy punkt feedbacku managera i użyj konkretnych informacji z bazy wiedzy zamiast ogólników. "
             "Przygotuj nowa wersje draftu po poprawkach."
         )
 
@@ -47,21 +70,12 @@ def draft_node(state: ReviewState) -> DraftUpdate:
         ]
     }
 
-    if action == "reject":
-        return {
-            "draft_reply": result.draft_reply,
-            "status": "rejected",
-            "messages": [
-                AIMessage(content=f"Wygenerowano draft:\n\n{result.draft_reply}"),
-                HumanMessage(content=f"Odrzucono. Powód: {feedback}"),
-            ]
-        }
 
-    return {
-        "draft_reply": feedback if feedback else result.draft_reply,
-        "status": "waiting_human",
-        "messages": [
-            AIMessage(content=f"Wygenerowano draft:\n\n{result.draft_reply}"),
-            HumanMessage(content="Zatwierdzono." + (f" Poprawka: {feedback}" if feedback else "")),
-        ]
-    }
+def _format_knowledge_context(knowledge_context: Any) -> str:
+    if knowledge_context is None:
+        return "Brak wyników."
+
+    if isinstance(knowledge_context, str):
+        return knowledge_context
+
+    return str(knowledge_context)

@@ -30,12 +30,12 @@ def run_review_loop(graph, initial_state: dict, config: dict):
         elif human_decision == "Odrzuc":
             resume_value = {
                 "action": "reject",
-                "feedback": input("\nPodaj powod odrzucenia")
+                "feedback": input("\nPodaj powod odrzucenia\n")
             }
         elif human_decision == "Edytuj Manualnie":
             resume_value = {
                 "action": "manual_edit",
-                "feedback": input("\nPodaj poprawiona wiadomosc")
+                "feedback": input("\nPodaj poprawiona wiadomosc\n")
             }
         else:
             resume_value = {
