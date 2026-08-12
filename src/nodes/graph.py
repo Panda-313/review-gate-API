@@ -5,6 +5,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 
+from .history import history
 from .send import send
 from .human_approval import human_approval
 from .draft import draft_node
@@ -28,13 +29,15 @@ def route_after_approval(state: ReviewState) -> str:
 def build_graph(vectorstore: Chroma):
     builder = StateGraph(ReviewState)
 
+    builder.add_node("history", history)
     builder.add_node("classify", classify_node)
     builder.add_node("draft", partial(draft_node, vectorstore=vectorstore))
     builder.add_node("human_approval", human_approval)
     builder.add_node("send", send)
 
     builder.add_edge(START, "classify")
-    builder.add_edge("classify", "draft")
+    builder.add_edge("classify", "history")
+    builder.add_edge("history", "draft")
     builder.add_edge("draft", "human_approval")
 
     builder.add_conditional_edges(

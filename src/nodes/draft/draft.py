@@ -27,7 +27,6 @@ def draft_node(state: ReviewState, vectorstore: Chroma) -> DraftUpdate:
     knowledge_section = ""
     if knowledge_context is not None:
         knowledge_section = f"\n\nWyniki z bazy wiedzy:\n{_format_knowledge_context(knowledge_context)}"
-    feedback_knowledge_section = f"{knowledge_section.lstrip()}\n\n" if knowledge_section else ""
 
     print("*" * 60)
     print(knowledge_section)
@@ -39,7 +38,9 @@ def draft_node(state: ReviewState, vectorstore: Chroma) -> DraftUpdate:
             f"Priorytet:\n{state.get('priority')}\n\n"
             f"Zgłoszenie klienta:\n{state['ticket']}"
             f"{knowledge_section}\n\n"
+            f"Historia zapytan dla naszego uzytkownika: {state['customer_history']} \n\n"
             "Ważne: jeśli są dostępne wyniki z bazy wiedzy, oprzyj odpowiedź przede wszystkim na nich. "
+            "Ważne: jeśli użytkownik zadał już w przeszłości podobne pytanie - zbuduj odpowiedź wzorując sie na naszej odpowiedzi na jego uprzednio zadane pytanie. "
             "Jeśli baza wiedzy wskazuje konkretne przyczyny problemu albo sugeruje konkretne pytania diagnostyczne, użyj właśnie ich."
         ) if not state.get("feedback") else (
             "Przygotuj nową wersję draftu na podstawie danych poniżej.\n\n"
@@ -48,8 +49,10 @@ def draft_node(state: ReviewState, vectorstore: Chroma) -> DraftUpdate:
             f"Zgłoszenie klienta:\n{state['ticket']}"
             f"{knowledge_section}\n\n"
             f"Ostatni draft:\n{state['draft_reply']}\n\n"
+            f"Historia zapytan dla naszego uzytkownika: {state['customer_history']} \n\n"
             f"Feedback managera (obowiazkowo uwzglednij):\n{state['feedback']}\n\n"
             "Ważne: jeśli są dostępne wyniki z bazy wiedzy, oprzyj odpowiedź przede wszystkim na nich. "
+            "Ważne: jeśli użytkownik zadał już w przeszłości podobne pytanie - zbuduj odpowiedź wzorując sie na naszej odpowiedzi na jego uprzednio zadane pytanie. "
             "Uwzględnij każdy punkt feedbacku managera i użyj konkretnych informacji z bazy wiedzy zamiast ogólników. "
             "Przygotuj nowa wersje draftu po poprawkach."
         )

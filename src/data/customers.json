@@ -1,0 +1,96 @@
+{
+  "cust_001": {
+    "customer_id": "cust_001",
+    "email": "jan.kowalski@example.com",
+    "name": "Jan Kowalski",
+    "plan": "Pro",
+    "tickets": [
+      {
+        "ticket_id": "T-1042",
+        "date": "2026-07-12",
+        "ticket": "Nie mogę zalogować się do panelu. Dostaję błąd 403 od rana.",
+        "category": "account",
+        "priority": "high",
+        "final_reply": "Dzień dobry, odblokowaliśmy konto i zresetowaliśmy aktywną sesję. Prosimy spróbować zalogować się ponownie. Jeśli problem się powtórzy, prosimy o informację.",
+        "status": "sent"
+      },
+      {
+        "ticket_id": "T-0988",
+        "date": "2026-05-03",
+        "ticket": "Nie dostałem faktury za maj na skrzynkę mailową.",
+        "category": "billing",
+        "priority": "medium",
+        "final_reply": "Dzień dobry, faktura została wysłana ponownie na adres accounting@example.com. Prosimy też sprawdzić folder spam.",
+        "status": "sent"
+      },
+      {
+        "ticket_id": "T-0911",
+        "date": "2026-03-18",
+        "ticket": "Webhooki z naszej integracji nie dochodzą do endpointu.",
+        "category": "technical",
+        "priority": "high",
+        "final_reply": "Po analizie logów wyszło, że endpoint zwracał błąd certyfikatu SSL. Po korekcie po stronie klienta dostawy webhooków działają poprawnie.",
+        "status": "sent"
+      }
+    ]
+  },
+  "cust_002": {
+    "customer_id": "cust_002",
+    "email": "anna.nowak@example.com",
+    "name": "Anna Nowak",
+    "plan": "Basic",
+    "tickets": []
+  },
+  "cust_003": {
+    "customer_id": "cust_003",
+    "email": "piotr.wisniewski@example.com",
+    "name": "Piotr Wiśniewski",
+    "plan": "Pro",
+    "tickets": [
+      {
+        "ticket_id": "T-1101",
+        "date": "2026-08-01",
+        "ticket": "Integracja z API zaczęła zwracać błąd 429.",
+        "category": "technical",
+        "priority": "high",
+        "final_reply": "Błąd 429 oznacza przekroczenie limitu zapytań. Prosimy o wdrożenie exponential backoff oraz sprawdzenie aktualnego użycia w panelu: Ustawienia → API → Użycie.",
+        "status": "sent"
+      },
+      {
+        "ticket_id": "T-1075",
+        "date": "2026-06-20",
+        "ticket": "Panel ładuje się bardzo wolno, wykresy timeoutują.",
+        "category": "technical",
+        "priority": "medium",
+        "final_reply": "Zaleciliśmy zawężenie zakresu dat w raporcie oraz wyczyszczenie cache przeglądarki. Po zmianach panel działa stabilnie.",
+        "status": "sent"
+      }
+    ]
+  },
+  "cust_004": {
+    "customer_id": "cust_004",
+    "email": "maria.lewandowska@example.com",
+    "name": "Maria Lewandowska",
+    "plan": "Pro",
+    "tickets": [
+      {
+        "ticket_id": "T-1120",
+        "date": "2026-07-28",
+        "ticket": "Chcę anulować subskrypcję, żeby karta nie była już obciążana.",
+        "category": "billing",
+        "priority": "medium",
+        "final_reply": "Subskrypcja została anulowana. Dostęp pozostaje aktywny do końca opłaconego okresu. Automatyczne odnowienie jest wyłączone.",
+        "status": "sent"
+      },
+      {
+        "ticket_id": "T-1003",
+        "date": "2026-04-10",
+        "ticket": "Proszę o zwrot za ostatnią płatność – rezygnuję z usługi.",
+        "category": "billing",
+        "priority": "high",
+        "final_reply": "Wniosek o zwrot został przyjęty. Środki wrócą na kartę w ciągu 5–10 dni roboczych.",
+        "status": "sent"
+      }
+    ]
+  }
+}

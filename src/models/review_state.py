@@ -13,10 +13,12 @@ Status = Literal[
 
 class ReviewState(TypedDict):
     ticket: str
+    customer_id: str
     category: str | None
     priority: str | None
     draft_reply: str | None
     feedback: str | None
     final_reply: str | None
+    customer_history: str | None
     status: Status
     messages: Annotated[list[AnyMessage], add_messages]

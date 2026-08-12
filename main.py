@@ -14,11 +14,11 @@ graph = build_graph(vectorstore=vectorstore)
 initial_state = {
     "ticket": "Nie mogę zalogować się do panelu. Dostaję błąd 403 od rana.",
     "messages": [],
-    "id": '001'
+    "customer_id": 'cust_001'
 }
 config = {
     "configurable": {
-        "thread_id": initial_state["id"]
+        "thread_id": initial_state["customer_id"]
     }
 }
 

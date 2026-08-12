@@ -7,6 +7,7 @@ DRAFT_SYSTEM_PROMPT = "Jesteś doświadczonym agentem supportu. Napisz profesjon
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RAW_DATA_PATH = PROJECT_ROOT / "src" / "data" / "raw"
+HISTORY_PATH = PROJECT_ROOT / "src" / "data" / "customers.json"
 DOCUMENT_GLOB_PATTERN = "**/*.md"
 CHUNK_SIZE = 600
 CHUNK_OVERLAP = 200
