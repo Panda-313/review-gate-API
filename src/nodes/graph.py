@@ -26,7 +26,10 @@ def route_after_approval(state: ReviewState) -> str:
 
     return "send"
 
-def build_graph(vectorstore: Chroma):
+def build_graph(vectorstore: Chroma, checkpointer=None):
+    if checkpointer is None:
+        checkpointer = InMemorySaver()
+    
     builder = StateGraph(ReviewState)
 
     builder.add_node("history", history)
@@ -46,7 +49,5 @@ def build_graph(vectorstore: Chroma):
     )
 
     builder.add_edge("send", END)
-
-    checkpointer = InMemorySaver()
 
     return builder.compile(checkpointer=checkpointer)
