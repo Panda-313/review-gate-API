@@ -1,12 +1,37 @@
 from fastapi import HTTPException
 
 from langchain_core.messages import messages_to_dict
+from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command
 
 from src.models import generate_ticket_id
 from src.nodes import build_graph
 
 from api.schemas import TicketAction
+
+
+def _build_config(
+    thread_id: str,
+    ticket_id: str,
+    customer_id: str,
+    flow: str,
+    action: str | None = None,
+) -> RunnableConfig:
+    tags = [f"flow:{flow}", f"customer:{customer_id}"]
+    if action:
+        tags.append(f"action:{action}")
+    
+    return {
+        "configurable": {"thread_id": thread_id},
+        "tags": tags,
+        "metadata": {
+            "ticket_id": ticket_id,
+            "customer_id": customer_id,
+            "flow": flow,
+            "action": action,
+        },
+    }
+
 
 class TicketService:
     def __init__(self, vectorstore, checkpointer):
@@ -35,7 +60,12 @@ class TicketService:
             "messages": [],
         }
         
-        config = {"configurable": {"thread_id": ticket_id}}
+        config = _build_config(
+            thread_id=ticket_id,
+            ticket_id=ticket_id,
+            customer_id=customer_id,
+            flow="create",
+        )
         
         result = self.graph.invoke(initial_state, config=config)
         self._tickets.append(result)
@@ -87,7 +117,16 @@ class TicketService:
                 detail=f"Ticket '{ticket_id}' nie został znaleziony"
             )
         
-        config = {"configurable": {"thread_id": ticket_id}}
+        current_ticket = self._tickets[ticket_index]
+        customer_id = current_ticket.get("customer_id", "unknown")
+        
+        config = _build_config(
+            thread_id=ticket_id,
+            ticket_id=ticket_id,
+            customer_id=customer_id,
+            flow="decision",
+            action=action.value,
+        )
         
         result = self.graph.invoke(
             Command(resume={"action": action.value, "feedback": feedback}),
