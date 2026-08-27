@@ -97,5 +97,4 @@ Swagger docs:
 
 ## Demo url
 
-TODO:
-`https://demo-url-here`
+[Demo URL](https://youtu.be/puctC-PEicY)
